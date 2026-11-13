@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi plato · Método HYB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap">
+<style>
+:root{
+  /* Layout: cabecera de marca, vistas por pestañas abajo; en escritorio el armador va a dos columnas con el plato fijo a la derecha */
+  --arena:#e8e5dc; --arena-2:#dddad1; --papel:#f4f2ec; --tinta:#1f1e1d; --tinta-2:#262626;
+  --gris:#5c5a55; --linea:#c4c0b5; --yema:#F2B21B; --carbo:#a19d92;
+  --display:'League Spartan','Arial Narrow',sans-serif; --body:'Poppins',system-ui,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--arena);color:var(--tinta);font-family:var(--body);-webkit-text-size-adjust:100%}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--yema);outline-offset:2px}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* Cabecera */
+.site{background:var(--tinta);color:var(--arena);padding-top:env(safe-area-inset-top,0px)}
+.site .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:68px}
+.brand{display:flex;flex-direction:column;gap:2px;background:none;border:0;padding:0;text-align:left;color:var(--arena)}
+.brand b{font-family:var(--display);font-weight:700;letter-spacing:.2em;font-size:16px}
+.brand span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#a8a49a;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--yema);flex-shrink:0;display:inline-block}
+.wa{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--yema);color:var(--tinta);font-weight:600;font-size:14px;text-decoration:none;border:0;white-space:nowrap}
+.wa:hover{filter:brightness(1.05)}
+.wa.dark{background:var(--tinta);color:var(--arena)}
+.wa svg{flex-shrink:0}
+
+main{padding:28px 0 12px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);font-weight:600}
+.h1{font-size:clamp(36px,8vw,60px);font-weight:800;line-height:.95;letter-spacing:-.02em;margin-top:10px}
+.h1 em{font-style:normal;color:var(--tinta);background:linear-gradient(transparent 62%,var(--yema) 62%)}
+.lead{font-size:15px;line-height:1.6;color:#3a3936;max-width:58ch;margin-top:12px}
+.h2{font-size:26px;font-weight:700}
+.sec{margin-top:28px}
+
+/* Inicio */
+.home{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+.meals{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.meal{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--papel);border:0;border-radius:18px;padding:16px 18px;min-height:64px}
+.meal:hover{background:#fbfaf6}
+.meal .ic{width:44px;height:44px;border-radius:14px;background:var(--arena-2);display:grid;place-items:center;flex-shrink:0}
+.meal:hover .ic{background:var(--yema)}
+.meal b{font-family:var(--display);font-size:20px;font-weight:700;display:block}
+.meal small{font-size:12px;color:var(--gris)}
+.meal .arr{margin-left:auto;color:var(--gris)}
+.how{background:var(--papel);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.how ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:h}
+.how li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;font-size:14px;line-height:1.5}
+.how li::before{counter-increment:h;content:counter(h);width:32px;height:32px;border-radius:50%;background:var(--tinta);color:var(--yema);font-family:var(--display);font-weight:800;display:grid;place-items:center}
+.cta{background:var(--tinta);color:var(--arena);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.cta .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--yema);font-weight:600}
+.cta h3{font-size:28px;font-weight:800;line-height:1}
+.cta p{font-size:14px;line-height:1.6;color:var(--arena-2)}
+.cta ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.cta li{font-size:13px;border-top:1px solid #4a4844;padding-top:8px}
+.cta .wa{align-self:flex-start;margin-top:4px}
+
+/* Armador */
+.head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.ghost{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid #8b877c;background:transparent;font-size:13px}
+.ghost:hover{background:var(--papel)}
+.build{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start;margin-top:18px}
+.panel{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px}
+.seg{display:inline-flex;background:var(--papel);border-radius:999px;padding:4px;gap:4px}
+.seg button{min-height:38px;padding:0 16px;border-radius:999px;border:0;background:transparent;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--tinta);color:var(--arena);font-weight:600}
+.group{background:var(--papel);border-radius:18px;padding:16px 16px 12px;margin-top:12px;scroll-margin-top:16px}
+.group h3{font-size:19px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.group h3 small{font-family:var(--body);font-size:12px;font-weight:400;color:var(--gris)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid #8b877c;background:transparent;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--tinta)}
+.chip[aria-pressed="true"]{background:var(--yema);border-color:var(--yema);font-weight:600}
+.chip.dk[aria-pressed="true"]{background:var(--tinta);color:var(--arena);border-color:var(--tinta)}
+.field{display:flex;gap:8px;margin-top:12px}
+.field input{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid #8b877c;background:var(--papel);padding:0 14px;font-size:14px}
+.field button{height:44px;padding:0 16px;border-radius:12px;border:0;background:var(--tinta);color:var(--arena);font-size:14px;font-weight:600}
+.search{width:100%;height:48px;border-radius:999px;border:1px solid #8b877c;background:var(--papel);padding:0 18px;font-size:15px;margin-top:12px}
+
+.platecard{background:var(--papel);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.platecard h3{font-size:22px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
+.platecard h3 small{font-family:var(--body);font-size:12px;font-weight:400;color:var(--gris)}
+.plate{width:min(260px,100%);margin:0 auto;display:block}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.legend button{display:flex;align-items:center;gap:8px;text-align:left;background:var(--arena);border:0;border-radius:12px;padding:8px 10px;font-size:12px;min-height:44px;line-height:1.3}
+.legend button b{display:block;font-size:12px}
+.legend button span.sw{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.check{display:flex;flex-direction:column;gap:6px}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45}
+.ck i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700}
+.ck.ok i{background:var(--tinta);color:var(--yema)}
+.ck.no i{border:1.5px solid #8b877c;color:var(--gris)}
+.ck.warn i{background:var(--yema);color:var(--tinta)}
+.adj{background:var(--yema);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.5}
+.adj b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.items{display:flex;flex-direction:column}
+.it{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--linea);font-size:14px}
+.it span{flex:1;min-width:0}
+.it select{height:36px;border-radius:10px;border:1px solid #8b877c;background:var(--arena);font-size:12px;padding:0 6px;max-width:150px}
+.it .x{width:36px;height:36px;border-radius:50%;border:0;background:transparent;font-size:20px;line-height:1;color:var(--gris)}
+.it .x:hover{background:var(--arena)}
+.empty{font-size:13px;color:var(--gris);text-align:center;padding:6px 0}
+.btn{min-height:48px;border-radius:14px;border:0;background:var(--tinta);color:var(--arena);font-weight:600;font-size:14px;width:100%}
+.btn.y{background:var(--yema);color:var(--tinta)}
+.btn.out{background:transparent;border:1px solid #8b877c;color:var(--tinta)}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.namein{width:100%;height:44px;border-radius:12px;border:1px solid #8b877c;background:var(--arena);padding:0 14px;font-size:14px}
+.ask{background:var(--tinta);color:var(--arena);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.ask p{font-size:13px;line-height:1.55;color:var(--arena-2)}
+.ask b{color:var(--yema)}
+.ask .row2 .wa{justify-content:center;width:100%}
+.ask .row2 button.wa.dark{border:1px solid #4a4844}
+.ref{font-size:12px;color:var(--gris);line-height:1.6}
+.mobilebar{display:none}
+
+/* Ideas */
+.idea{background:var(--papel);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.idea h3{font-size:21px;font-weight:700}
+.idea .meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--gris)}
+.idea .meta b{color:var(--tinta)}
+.bar{height:8px;border-radius:999px;background:var(--arena-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--yema)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:12px;border-radius:999px;padding:4px 10px;background:var(--arena)}
+.tags span.have{background:var(--tinta);color:var(--arena)}
+.miss{font-size:13px;color:#3a3936;line-height:1.5}
+.ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:16px}
+
+/* Guardadas */
+.saved{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:14px}
+.sv{background:var(--papel);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sv h3{font-size:19px;font-weight:700}
+.sv p{font-size:13px;color:#3a3936;line-height:1.5}
+.sv .acts{display:flex;flex-wrap:wrap;gap:6px}
+.sv .acts button{min-height:38px;padding:0 12px;border-radius:999px;border:1px solid #8b877c;background:transparent;font-size:12px}
+.sv .acts button.danger{border-color:var(--tinta);background:var(--tinta);color:var(--arena)}
+.blank{background:var(--papel);border-radius:18px;padding:28px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;margin-top:16px}
+.blank p{font-size:14px;color:var(--gris);max-width:40ch}
+
+/* Pie y navegación */
+.foot{margin-top:32px}
+.foot .cta{flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.foot .cta div{display:flex;flex-direction:column;gap:6px;max-width:52ch}
+.sign{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--gris);margin-top:16px;padding-top:12px;border-top:1px solid var(--linea)}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:4px;padding:6px;background:var(--tinta);border-radius:22px;width:min(520px,calc(100% - 24px))}
+nav.tabs button{flex:1;border:0;background:transparent;color:#a8a49a;border-radius:16px;min-height:52px;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+nav.tabs button[aria-current="page"]{background:var(--yema);color:var(--tinta);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--tinta);color:var(--arena);padding:12px 20px;border-radius:14px;font-size:14px;z-index:30;max-width:90%;text-align:center;border:1px solid var(--yema)}
+.copybox{width:100%;min-height:110px;border-radius:12px;border:1px solid #8b877c;background:var(--arena);padding:10px;font-size:13px;font-family:var(--body)}
+
+@media (max-width:900px){
+  .home{grid-template-columns:1fr}
+  .build{grid-template-columns:1fr}
+  .panel{position:static}
+  .mobilebar{display:flex;position:sticky;top:0;z-index:15;background:var(--arena);padding:10px 0;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--linea);font-size:13px}
+  .mobilebar a{font-weight:600;text-underline-offset:4px}
+}
+@media (max-width:480px){
+  .wrap{padding:0 16px}
+  .wa.hide-sm span{display:none}
+  .wa.hide-sm{padding:0 14px}
+  .cta ul{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <button class="brand" data-act="go" data-arg="home" aria-label="Ir al inicio de Mi plato">
+      <b>JUANMA</b>
+      <span><span class="dot"></span>Mi plato · Método HYB</span>
+    </button>
+    <a class="wa hide-sm" href="https://wa.me/message/2Q52S7TE3VSGA1" target="_blank" rel="noopener">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+      <span>Escribime</span>
+    </a>
+  </div>
+</header>
+
+<main><div class="wrap" id="app"></div></main>
+
+<nav class="tabs" aria-label="Secciones">
+  <button data-act="go" data-arg="home" data-tab="home"></button>
+  <button data-act="pick" data-arg="build" data-tab="build"></button>
+  <button data-act="pick" data-arg="ideas" data-tab="ideas"></button>
+  <button data-act="go" data-arg="saved" data-tab="saved"></button>
+</nav>
+
+<script>
+const WA = 'https://wa.me/message/2Q52S7TE3VSGA1';
+const ICON = {
+  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+  build:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12H3"/>',
+  ideas:'<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2Z"/>',
+  saved:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+  d:'<path d="M4 14h16M7 18h10M12 3v2M4 6l2 2m14-2-2 2"/><path d="M7 14a5 5 0 0 1 10 0"/>',
+  a:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1"/>',
+  m:'<path d="M4 8h13v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Zm13 1h2a3 3 0 0 1 0 6h-2M8 3v2m5-2v2"/>',
+  c:'<path d="M20 14A9 9 0 0 1 10 3a9 9 0 1 0 10 11Z"/>',
+  s:'<path d="M12 8c-7-5-11 3-7 10 2 4 5 3 7 2 2 1 5 2 7-2 4-7 0-15-7-10Zm0 0c-1-4 1-6 4-6 0 3-1 5-4 6Z"/>',
+  wa:'<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"/>',
+  arr:'<path d="M5 12h14M13 6l6 6-6 6"/>'
+};
+const ic = (n, s=22) => `<svg aria-hidden="true" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICON[n]||ICON.ideas}</svg>`;
+
+const MEALS = {d:'Desayuno', a:'Almuerzo', m:'Merienda', c:'Cena', s:'Entre comidas'};
+const MEAL_SUB = {d:'Para arrancar el día', a:'El plato fuerte del mediodía', m:'Para la tarde', c:'Para cerrar el día', s:'Snack o colación'};
+const GROUPS = [
+  {k:'P', name:'Proteína', hint:'2 palmas por comida', color:'#F2B21B'},
+  {k:'C', name:'Carbohidratos', hint:'1 a 2 manos ahuecadas', color:'#a19d92'},
+  {k:'V', name:'Verduras y frutas', hint:'2 puños o más', color:'#cfcabd'},
+  {k:'G', name:'Grasas', hint:'1 a 2 pulgares', color:'#1f1e1d'}
+];
+const PORTIONS = ['A gusto','1 palma','2 palmas','1 mano ahuecada','2 manos ahuecadas','1 puño','2 puños','1 pulgar','2 pulgares','1 unidad','2 unidades','3 unidades','1 pote','1 lata','1 taza','2 rebanadas','1 cucharada','2 cucharadas'];
+
+// n | grupos | porción sugerida
+const FOOD = `Huevos|P|2 unidades;Claras|P|1 taza;Pollo|P|2 palmas;Muslo de pollo|P|1 unidad;Carne vacuna|P|2 palmas;Carne picada magra|P|2 palmas;Cerdo magro|P|2 palmas;Merluza|P|2 palmas;Salmón|P|1 palma;Atún|P|1 lata;Sardinas|P|1 lata;Jamón magro|P|2 rebanadas;Yogur griego|P|1 pote;Yogur natural|P|1 pote;Leche descremada|P|1 taza;Queso magro|P|2 rebanadas;Ricota|P|2 cucharadas;Proteína en polvo|P|1 unidad;Lentejas|PC|1 mano ahuecada;Garbanzos|PC|1 mano ahuecada;Porotos|PC|1 mano ahuecada;Soja texturizada|P|1 mano ahuecada;Tofu|P|1 palma;Arroz|C|1 mano ahuecada;Fideos|C|1 mano ahuecada;Papa|C|1 unidad;Boniato|C|1 unidad;Polenta|C|1 mano ahuecada;Avena|C|1 mano ahuecada;Pan integral|C|2 rebanadas;Pan blanco|C|2 rebanadas;Rapiditas|C|2 unidades;Galletas de arroz|C|3 unidades;Choclo|C|1 puño;Quinoa|C|1 mano ahuecada;Granola|C|2 cucharadas;Lechuga|V|2 puños;Rúcula|V|1 puño;Espinaca|V|1 puño;Tomate|V|1 unidad;Zanahoria|V|1 unidad;Pepino|V|1 puño;Brócoli|V|1 puño;Zapallito|V|1 unidad;Calabaza|V|1 puño;Morrón|V|1 unidad;Cebolla|V|1 unidad;Hongos|V|1 puño;Repollo|V|1 puño;Remolacha|V|1 unidad;Verduras congeladas|V|1 puño;Banana|V|1 unidad;Manzana|V|1 unidad;Naranja|V|1 unidad;Mandarina|V|2 unidades;Frutillas|V|1 puño;Frutos rojos|V|1 puño;Kiwi|V|1 unidad;Durazno|V|1 unidad;Aceite de oliva|G|1 cucharada;Palta|G|1 pulgar;Nueces|G|1 pulgar;Almendras|G|1 pulgar;Maní|G|1 pulgar;Pasta de maní|G|1 pulgar;Chía|G|1 cucharada;Semillas|G|1 cucharada;Queso semiduro|G|1 pulgar;Hummus|G|2 cucharadas;Chocolate amargo|G|1 pulgar;Tuco o salsa de tomate|O|A gusto;Condimentos|O|A gusto;Mostaza|O|A gusto;Café o mate|O|A gusto;Canela o cacao|O|A gusto;Miel|O|1 cucharada;Mermelada|O|1 cucharada`
+  .split(';').map(s => { const a = s.split('|'); return {n:a[0], c:a[1], p:a[2]}; });
+const findF = n => FOOD.find(f => f.n === n) || {n, c:'O', p:'A gusto'};
+
+// nombre | comidas | d/s | minutos | ingredientes | cómo
+const RECIPES = `Tostadas con huevo revuelto y queso|dm|s|10|Pan integral,Huevos,Queso magro,Tomate|Revolvé los huevos con un chorrito de aceite. Tostá el pan y sumá queso, huevo y tomate.;Yogur con avena y banana|dms|d|3|Yogur griego,Avena,Banana,Nueces|Mezclá el yogur con la avena, sumá la banana en rodajas y las nueces picadas.;Tostada con palta y huevo|dm|s|10|Pan integral,Palta,Huevos|Pisá la palta sobre la tostada y sumá el huevo duro, revuelto o a la plancha.;Avena cocida con leche y frutillas|d|d|10|Avena,Leche descremada,Frutillas,Canela o cacao|Cociná la avena en la leche a fuego bajo. Sumá las frutillas y canela.;Omelette de espinaca y queso|dc|s|10|Huevos,Espinaca,Queso magro|Batí los huevos y cocinalos en sartén con la espinaca y el queso. Doblá y listo.;Arroz con huevo, tomate y palta|ac|s|15|Arroz,Huevos,Tomate,Palta|Usá arroz ya cocido. Sumá huevos revueltos, tomate en cubos y palta.;Pollo con papa y ensalada|ac|s|30|Pollo,Papa,Lechuga,Tomate,Aceite de oliva|Cociná el pollo y las papas al horno. Armá la ensalada y aderezá con una cucharada de aceite.;Fideos con atún y tomate|ac|s|15|Fideos,Atún,Tomate,Cebolla|Hervís los fideos. Salteá cebolla y tomate, sumá el atún y mezclá.;Guiso de lentejas|ac|s|35|Lentejas,Zanahoria,Cebolla,Papa,Calabaza|Rehogá cebolla y zanahoria, sumá papa, calabaza, lentejas y agua. Cociná hasta que ablande.;Tortilla de papa y zapallito|ac|s|20|Huevos,Papa,Cebolla,Zapallito|Salteá papa, cebolla y zapallito. Sumá los huevos batidos y cociná de ambos lados.;Bowl de arroz, pollo y brócoli|ac|s|20|Arroz,Pollo,Brócoli,Aceite de oliva|Pollo en tiras a la plancha y brócoli al vapor, sobre el arroz con un chorrito de aceite.;Carne con boniato y ensalada|ac|s|30|Carne vacuna,Boniato,Lechuga,Tomate|Carne a la plancha, boniato al horno y una ensalada grande.;Wrap de pollo y vegetales|acs|s|10|Rapiditas,Pollo,Lechuga,Tomate,Palta|Calentá la rapidita y rellenala con pollo desmenuzado, verduras y palta.;Merluza al horno con calabaza|c|s|25|Merluza,Calabaza,Aceite de oliva,Condimentos|Merluza y calabaza al horno con aceite y condimentos, unos 20 minutos.;Polenta con tuco y carne picada|ac|s|20|Polenta,Carne picada magra,Tuco o salsa de tomate,Cebolla|Dorá la carne con cebolla, sumá el tuco. Polenta instantánea en 5 minutos y servís arriba.;Milanesa al horno con puré de calabaza|ac|s|35|Carne vacuna,Calabaza,Lechuga,Tomate|Milanesas al horno sin aceite extra, puré de calabaza y ensalada.;Arroz con pollo y verduras|ac|s|30|Arroz,Pollo,Morrón,Cebolla,Verduras congeladas|Dorá el pollo con cebolla y morrón, sumá arroz, verduras y agua. Cociná tapado.;Ensalada completa con atún|ac|s|10|Atún,Lechuga,Tomate,Choclo,Huevos|Hojas, tomate, choclo, huevo duro y atún. Limón y una cucharadita de aceite.;Hummus con bastones de verdura|ms|s|5|Hummus,Zanahoria,Pepino|Cortá las verduras en bastones y mojá en el hummus.;Tostada con pasta de maní y banana|dms|d|5|Pan integral,Pasta de maní,Banana|Untá la tostada con pasta de maní al ras y sumá la banana.;Licuado de banana y cacao|ms|d|3|Leche descremada,Banana,Canela o cacao,Proteína en polvo|Licuá todo con hielo. Sin proteína en polvo también sale.;Ricota con miel y durazno|ms|d|3|Ricota,Miel,Durazno|Ricota en un bowl con durazno en trozos y un hilo de miel.;Fruta con frutos secos|s|d|2|Manzana,Almendras|Una fruta y un puñado chico de frutos secos.;Galletas de arroz con queso y tomate|ms|s|3|Galletas de arroz,Queso magro,Tomate|Queso y tomate arriba de las galletas, con orégano.;Pan con atún y pepino|mcs|s|5|Pan integral,Atún,Pepino|Mezclá el atún con pepino picado y rellená el pan.`
+  .split(';').map(s => { const a = s.split('|'); return {n:a[0], m:a[1], t:a[2], min:+a[3], i:a[4].split(','), s:a[5]}; });
+
+let S = {v:'home', meal:null, next:'build', items:[], mode:'g', q:'', pantry:[], pref:'*', tmax:999, ideas:null, eid:null, name:'', del:null, copyText:null};
+let saved = [];
+try { saved = JSON.parse(localStorage.getItem('hyb-miplato') || '[]'); } catch(e) {}
+const store = () => { try { localStorage.setItem('hyb-miplato', JSON.stringify(saved)); } catch(e) {} };
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const inG = (f, k) => f.c.includes(k) || (k === 'V' && f.c.includes('F'));
+const has = k => S.items.some(x => inG(x, k));
+const count = k => S.items.filter(x => inG(x, k)).length;
+
+function toast(msg){
+  document.querySelector('.toast')?.remove();
+  const el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role','status'); el.textContent = msg;
+  document.body.append(el); setTimeout(() => el.remove(), 3000);
+}
+
+/* --- Chequeo HYB: las 3 preguntas + grasa, y un solo ajuste --- */
+function checks(){
+  const snack = S.meal === 's', light = S.meal === 'd' || S.meal === 'm';
+  const c = count('C'), g = count('G');
+  const out = [];
+  out.push(has('P') ? {s:'ok', t:'Hay proteína.'} : {s:'no', t:'Falta proteína.', fix:'Sumá una proteína: huevo, atún, pollo, yogur griego o legumbres. Es lo que más te va a llenar.'});
+  if (!snack) out.push(has('V') ? {s:'ok', t: light ? 'Hay fruta o verdura.' : 'Hay verdura o fruta.'} : {s:'no', t:'Falta algo vegetal.', fix: light ? 'Sumá una fruta: banana, manzana o frutillas.' : 'Sumá verdura: que ocupe la mitad del plato. Hojas, tomate o lo que haya.'});
+  out.push(c > 2 ? {s:'warn', t:`Hay ${c} carbohidratos juntos.`, fix:'Elegí uno o dos y dales tamaño: 1 a 2 manos ahuecadas en total.'} : {s:'ok', t: c ? 'Lo denso tiene tamaño.' : 'Sin carbohidratos: está bien si querés algo más liviano.'});
+  if (g > 2) out.push({s:'warn', t:`Hay ${g} fuentes de grasa.`, fix:'Con una alcanza: si ya hay palta o queso, el aceite va medido o no va.'});
+  else if (!snack && !light && !g) out.push({s:'ok', t:'Sumá un pulgar de grasa si querés: aceite, palta o frutos secos.'});
+  return out;
+}
+function adjust(){
+  if (!S.items.length) return null;
+  const c = checks().find(x => x.fix);
+  return c ? c.fix : (S.meal === 's' ? 'Combinación simple y práctica: alcanza como colación.' : 'Plato completo. Proteína, vegetales y lo denso con tamaño: así se ve una comida HYB.');
+}
+function readyCount(){ const c = checks(); return [c.filter(x => x.s === 'ok').length, c.length]; }
+
+/* --- Plato SVG --- */
+function plateSVG(){
+  const on = k => has(k);
+  const fill = (k, col) => on(k) ? col : '#ebe8e0';
+  const txt = (k, dark) => on(k) ? (dark ? '#1f1e1d' : '#1f1e1d') : '#5c5a55';
+  const lbl = k => on(k) ? `${count(k)} elegido${count(k) > 1 ? 's' : ''}` : '+ Elegir';
+  return `<svg class="plate" viewBox="0 0 220 220" role="img" aria-label="Tu plato: ${GROUPS.map(g => g.name + (on(g.k) ? ' completo' : ' vacío')).join(', ')}">
+    <circle cx="110" cy="110" r="104" fill="#fbfaf6" stroke="#c4c0b5"/>
+    <path d="M110 18 A92 92 0 0 1 110 202 Z" fill="${fill('V','#d9d4c6')}"/>
+    <path d="M110 110 L110 202 A92 92 0 0 1 18 110 Z" fill="${fill('P','#F2B21B')}"/>
+    <path d="M110 110 L18 110 A92 92 0 0 1 110 18 Z" fill="${fill('C','#a19d92')}"/>
+    <path d="M110 18 V202 M18 110 H110" stroke="#fbfaf6" stroke-width="3"/>
+    <text x="158" y="106" text-anchor="middle" font-family="League Spartan,sans-serif" font-weight="700" font-size="14" fill="${txt('V')}">Verduras</text>
+    <text x="158" y="122" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" fill="${txt('V')}">${lbl('V')}</text>
+    <text x="68" y="150" text-anchor="middle" font-family="League Spartan,sans-serif" font-weight="700" font-size="14" fill="${txt('P')}">Proteína</text>
+    <text x="68" y="165" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" fill="${txt('P')}">${lbl('P')}</text>
+    <text x="68" y="68" text-anchor="middle" font-family="League Spartan,sans-serif" font-weight="700" font-size="13" fill="${txt('C')}">Carbohidratos</text>
+    <text x="68" y="83" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" fill="${txt('C')}">${lbl('C')}</text>
+    <circle cx="192" cy="28" r="18" fill="${on('G') ? '#1f1e1d' : '#ebe8e0'}" stroke="#c4c0b5"/>
+    <text x="192" y="32" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" font-weight="600" fill="${on('G') ? '#F2B21B' : '#5c5a55'}">Grasa</text>
+  </svg>`;
+}
+
+/* --- Vistas --- */
+const chip = (t, on, act, arg, cls='') => `<button class="chip ${cls}" aria-pressed="${!!on}" data-act="${act}" data-arg="${esc(arg)}">${on ? '✓ ' : ''}${esc(t)}</button>`;
+const foodChips = list => list.map(f => chip(f.n, S.items.some(x => x.n === f.n), 'tog', f.n)).join('');
+const waBtn = (label='Escribime por WhatsApp', cls='') => `<a class="wa ${cls}" href="${WA}" target="_blank" rel="noopener">${ic('wa',18)}<span>${label}</span></a>`;
+const ctaBlock = () => `<div class="cta"><span class="k">Coaching 1 a 1 · Método HYB</span><h3>¿Querés que tu plato esté pensado para vos?</h3><p>Esta herramienta te ordena. El plan a tu medida, con tus horarios, quién cocina en tu casa y tu entrenamiento, lo armamos juntos.</p><ul><li>Entrenamiento individualizado</li><li>Guía de alimentación flexible</li><li>Seguimiento semanal</li><li>Soporte diario</li></ul>${waBtn()}</div>`;
+const footer = () => `<div class="foot"><div class="cta"><div><span class="k">¿Te quedó alguna duda?</span><p>Mandame tu plato por WhatsApp y te digo qué ajustaría. Te respondo yo.</p></div>${waBtn('Hablemos')}</div><div class="sign"><span>@juanmaasolis</span><span style="display:flex;align-items:center;gap:6px"><span class="dot"></span>Método HYB</span></div></div>`;
+
+const V = {
+  home: () => `<div class="home">
+    <section>
+      <p class="eyebrow">Mi plato · Método HYB</p>
+      <h1 class="h1">¿Qué vas a <em>comer hoy?</em></h1>
+      <p class="lead">Elegí la comida, armá tu plato con lo que tenés y en 10 segundos ves si está completo y cuál es el único ajuste que le harías.</p>
+      <div class="meals">${Object.entries(MEALS).map(([k,v]) => `<button class="meal" data-act="meal" data-arg="${k}"><span class="ic">${ic(k)}</span><span><b>${v}</b><small>${MEAL_SUB[k]}</small></span><span class="arr">${ic('arr',20)}</span></button>`).join('')}</div>
+    </section>
+    <aside style="display:flex;flex-direction:column;gap:14px">
+      <div class="how"><h2 class="h2">Cómo funciona</h2><ol>
+        <li><span><b>Elegí la comida</b> y tocá lo que tenés o lo que te sirvieron.</span></li>
+        <li><span><b>Mirá el plato:</b> se completa con proteína, carbohidratos, verduras y grasa.</span></li>
+        <li><span><b>Hacé un solo ajuste.</b> Nunca tres. Guardalo para repetirlo cuando quieras.</span></li>
+      </ol></div>
+      ${ctaBlock()}
+    </aside>
+  </div>${footer()}`,
+
+  pick: () => `<p class="eyebrow">${S.next === 'build' ? 'Armar mi plato' : 'Buscar ideas'}</p><h1 class="h1">¿Qué comida querés resolver?</h1>
+    <div class="meals" style="max-width:560px">${Object.entries(MEALS).map(([k,v]) => `<button class="meal" data-act="pickmeal" data-arg="${k}"><span class="ic">${ic(k)}</span><span><b>${v}</b><small>${MEAL_SUB[k]}</small></span><span class="arr">${ic('arr',20)}</span></button>`).join('')}</div>${footer()}`,
+
+  meal: () => `<p class="eyebrow">${MEALS[S.meal]}</p><h1 class="h1">¿Cómo querés arrancar?</h1>
+    <div class="meals" style="max-width:560px">
+      <button class="meal" data-act="to" data-arg="build"><span class="ic">${ic('build')}</span><span><b>Armar mi plato</b><small>Elegí alimentos y mirá si está completo</small></span><span class="arr">${ic('arr',20)}</span></button>
+      <button class="meal" data-act="to" data-arg="ideas"><span class="ic">${ic('ideas')}</span><span><b>Buscar ideas</b><small>Contame qué tenés y te propongo platos</small></span><span class="arr">${ic('arr',20)}</span></button>
+    </div>${footer()}`,
+
+  build: () => {
+    const [ok, tot] = readyCount();
+    const g = S.mode === 'g';
+    const picker = g
+      ? GROUPS.map((gr, i) => `<div class="group" id="g-${gr.k}"><h3>${i+1}. ${gr.name}<small>${gr.hint}</small></h3><div class="chips">${foodChips(FOOD.filter(f => inG(f, gr.k)))}</div></div>`).join('') +
+        `<div class="group"><h3>Para dar sabor<small>Opcional</small></h3><div class="chips">${foodChips(FOOD.filter(f => f.c === 'O'))}</div></div>`
+      : `<input class="search" type="search" id="q" placeholder="Buscar: arroz, huevo, palta…" value="${esc(S.q)}" aria-label="Buscar alimento"><div class="chips" id="res" style="margin-top:12px"></div>`;
+    const items = S.items.length
+      ? S.items.map((x, i) => `<div class="it"><span>${esc(x.n)}</span><select data-act="portion" data-arg="${i}" aria-label="Porción de ${esc(x.n)}">${[...new Set([x.p, ...PORTIONS])].map(o => `<option ${o === x.p ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select><button class="x" data-act="rm" data-arg="${i}" aria-label="Quitar ${esc(x.n)}">×</button></div>`).join('')
+      : `<p class="empty">Tocá alimentos a la izquierda y tu plato se va armando.</p>`;
+    const adj = adjust();
+    return `<div class="head-row"><div><p class="eyebrow">Mi plato · ${MEALS[S.meal]}</p><h1 class="h1" style="font-size:clamp(32px,6vw,48px)">Armá tu plato</h1></div><button class="ghost" data-act="pick" data-arg="build">Cambiar comida</button></div>
+    <div class="mobilebar"><span><b>${S.items.length}</b> alimento${S.items.length === 1 ? '' : 's'} · ${S.items.length ? ok + ' de ' + tot + ' listos' : 'empezá a elegir'}</span><a href="#miplato">Ver mi plato ↓</a></div>
+    <div class="build">
+      <section>
+        <div class="seg" role="group" aria-label="Modo"><button aria-pressed="${g}" data-act="mode" data-arg="g">Guiado</button><button aria-pressed="${!g}" data-act="mode" data-arg="l">Buscar</button></div>
+        ${picker}
+        <div class="group"><h3>¿Otro alimento?<small>Agregalo a mano</small></h3><div class="field"><input id="cu" placeholder="Ej.: milanesa de soja" aria-label="Agregar otro alimento"><button data-act="addc">Agregar</button></div></div>
+      </section>
+      <aside class="panel" id="miplato" tabindex="-1">
+        <div class="platecard">
+          <h3>Tu plato<small>${S.items.length ? ok + ' de ' + tot + ' listos' : ''}</small></h3>
+          ${plateSVG()}
+          <div class="legend">${GROUPS.map(gr => `<button data-act="jump" data-arg="${gr.k}"><span class="sw" style="background:${has(gr.k) ? gr.color : '#ebe8e0'};border:1px solid #c4c0b5"></span><span><b>${gr.name}</b>${gr.hint}</span></button>`).join('')}</div>
+          ${S.items.length ? `<div class="check">${checks().map(c => `<p class="ck ${c.s}"><i>${c.s === 'ok' ? '✓' : c.s === 'warn' ? '!' : '–'}</i><span>${c.t}</span></p>`).join('')}</div>` : ''}
+          ${adj ? `<div class="adj"><b>Tu único ajuste</b>${adj}</div>` : ''}
+          <div class="items">${items}</div>
+          ${S.items.length ? `<input class="namein" id="nm" placeholder="Nombre del plato (opcional)" value="${esc(S.name)}" aria-label="Nombre del plato">
+          <div class="row2"><button class="btn" data-act="save">Guardar</button><button class="btn out" data-act="reset">Empezar de nuevo</button></div>` : ''}
+        </div>
+        ${S.items.length ? `<div class="ask"><p><b>¿Querés que lo revise?</b> Copiá tu plato y mandámelo por WhatsApp: te digo qué ajustaría para tu objetivo.</p><div class="row2"><button class="wa dark" data-act="copy">Copiar plato</button>${waBtn('Enviar')}</div>${S.copyText !== null ? `<textarea class="copybox" readonly aria-label="Tu plato para copiar">${esc(S.copyText)}</textarea>` : ''}</div>` : ''}
+        <p class="ref">Las porciones son referencias con la mano: palma para proteína, mano ahuecada para carbohidratos, puño para verduras y frutas, pulgar para grasas. Lo exacto depende de tu objetivo y tu actividad.</p>
+      </aside>
+    </div>${footer()}`;
+  },
+
+  ideas: () => {
+    const times = [[5,'Hasta 5 min'],[15,'Hasta 15 min'],[999,'Sin apuro']];
+    const sweet = 'dms'.includes(S.meal);
+    const res = S.ideas === null ? '' : S.ideas.length ? `<div class="ideas-grid">${S.ideas.map(o => `<div class="idea">
+        <h3>${esc(o.r.n)}</h3>
+        <p class="meta"><span><b>${o.r.min} min</b></span><span>Tenés ${o.h.length} de ${o.r.i.length}</span></p>
+        <div class="bar" aria-hidden="true"><i style="width:${Math.round(o.k*100)}%"></i></div>
+        <div class="tags">${o.r.i.map(i => `<span class="${o.h.includes(i) ? 'have' : ''}">${esc(i)}</span>`).join('')}</div>
+        <p class="miss">${esc(o.r.s)}</p>
+        ${o.x.length ? `<p class="miss"><b>Te falta:</b> ${o.x.map(x => `${esc(x)}${o.sub[x] ? ' (o usá ' + esc(o.sub[x]) + ')' : ''}`).join(', ')}</p>` : ''}
+        <button class="btn y" data-act="use" data-arg="${RECIPES.indexOf(o.r)}">Usar este plato</button>
+      </div>`).join('')}</div>` : `<div class="blank"><p>Con eso no encontré platos para ${MEALS[S.meal].toLowerCase()}. Sumá algún alimento más o cambiá el tiempo.</p></div>`;
+    return `<div class="head-row"><div><p class="eyebrow">Buscar ideas · ${MEALS[S.meal]}</p><h1 class="h1" style="font-size:clamp(32px,6vw,48px)">¿Qué tenés en casa?</h1></div><button class="ghost" data-act="pick" data-arg="ideas">Cambiar comida</button></div>
+      <p class="lead">Tocá lo que tenés. Te muestro platos ordenados por lo que más se acerca, y qué podés usar si te falta algo.</p>
+      ${GROUPS.map(gr => `<div class="group"><h3>${gr.name}</h3><div class="chips">${FOOD.filter(f => inG(f, gr.k)).map(f => chip(f.n, S.pantry.includes(f.n), 'pan', f.n)).join('')}</div></div>`).join('')}
+      <div class="group"><h3>Preferencias</h3>
+        ${sweet ? `<div class="chips">${[['*','Da igual'],['d','Dulce'],['s','Salado']].map(([k,v]) => chip(v, S.pref === k, 'pref', k, 'dk')).join('')}</div>` : ''}
+        <div class="chips">${times.map(([k,v]) => chip(v, S.tmax === k, 'tmax', k, 'dk')).join('')}</div>
+      </div>
+      <div style="margin-top:14px;max-width:420px"><button class="btn y" data-act="ideas">Ver ideas ${S.pantry.length ? '(' + S.pantry.length + ' alimentos)' : ''}</button></div>
+      ${res}${footer()}`;
+  },
+
+  saved: () => {
+    const groups = Object.entries(MEALS).map(([k,v]) => [k, v, saved.filter(x => x.meal === k)]).filter(x => x[2].length);
+    return `<p class="eyebrow">Tus platos guardados</p><h1 class="h1">Mis comidas</h1>
+      <p class="lead">Los platos que guardás quedan en este teléfono o computadora. Repetir lo que ya funciona es la forma más fácil de sostener.</p>
+      ${groups.length ? groups.map(([k, v, l]) => `<div class="sec"><h2 class="h2">${v}</h2><div class="saved">${l.map(o => `<div class="sv"><h3>${esc(o.name)}</h3><p>${o.items.map(x => esc(x.n) + (x.p && x.p !== 'A gusto' ? ' (' + esc(x.p) + ')' : '')).join(', ')}</p>
+        <div class="acts">${S.del === o.id ? `<button class="danger" data-act="delok" data-arg="${o.id}">Sí, eliminar</button><button data-act="delno">Cancelar</button>` : `<button data-act="open" data-arg="${o.id}">Abrir y editar</button><button data-act="dup" data-arg="${o.id}">Duplicar</button><button data-act="del" data-arg="${o.id}">Eliminar</button>`}</div></div>`).join('')}</div></div>`).join('')
+      : `<div class="blank"><p>Todavía no guardaste ningún plato. Armá uno y guardalo para repetirlo cuando quieras.</p><button class="btn y" style="max-width:260px" data-act="pick" data-arg="build">Armar mi primer plato</button></div>`}
+      ${footer()}`;
+  }
+};
+
+/* --- Render y acciones --- */
+function draw(keep){
+  const y = window.scrollY;
+  $('#app').innerHTML = V[S.v]();
+  const tab = S.v === 'pick' ? S.next : (S.v === 'meal' ? 'home' : S.v);
+  document.querySelectorAll('nav.tabs button').forEach(b => { if (b.dataset.tab === tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  if (S.v === 'build' && S.mode === 'l') renderRes();
+  if (keep) window.scrollTo(0, y); else window.scrollTo(0, 0);
+}
+function renderRes(){
+  const q = (S.q || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const l = FOOD.filter(f => f.n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q));
+  $('#res').innerHTML = l.length ? foodChips(l) : '<p class="empty">No está en la lista: agregalo abajo en "¿Otro alimento?".</p>';
+}
+function findIdeas(){
+  const p = S.pantry;
+  S.ideas = RECIPES
+    .filter(r => r.m.includes(S.meal) && r.min <= S.tmax && (S.pref === '*' || r.t === S.pref))
+    .map(r => {
+      const h = r.i.filter(i => p.includes(i)), x = r.i.filter(i => !p.includes(i));
+      const sub = {};
+      x.forEach(m => { const f = findF(m); const alt = p.find(n => { const pf = findF(n); return pf.c[0] === f.c[0] && !r.i.includes(n); }); if (alt) sub[m] = alt; });
+      return {r, h, x, sub, k: h.length / r.i.length};
+    })
+    .filter(o => p.length ? o.h.length : true)
+    .sort((a,b) => b.k - a.k || a.x.length - b.x.length || a.r.min - b.r.min)
+    .slice(0, 6);
+}
+function plateText(){
+  const lines = S.items.map(x => `• ${x.n}${x.p && x.p !== 'A gusto' ? ' — ' + x.p : ''}`).join('\n');
+  return `Hola Juanma, este es mi plato de ${MEALS[S.meal].toLowerCase()}${S.name ? ' (' + S.name + ')' : ''}:\n${lines}\n¿Qué le ajustarías?`;
+}
+
+const A = {
+  go: a => { S.v = a; if (a === 'home') S.meal = null; S.del = null; draw(); },
+  pick: a => { S.next = a; if (S.meal) { S.v = a; } else S.v = 'pick'; S.copyText = null; draw(); },
+  meal: k => { if (S.meal !== k) { S.items = []; S.ideas = null; S.eid = null; S.name = ''; } S.meal = k; S.v = 'meal'; draw(); },
+  pickmeal: k => { if (S.meal !== k) { S.items = []; S.ideas = null; S.eid = null; S.name = ''; } S.meal = k; S.v = S.next; S.copyText = null; draw(); },
+  to: v => { S.v = v; draw(); },
+  tog: n => { const k = S.items.findIndex(x => x.n === n); if (k >= 0) S.items.splice(k, 1); else S.items.push({...findF(n)}); S.copyText = null; draw(1); },
+  rm: i => { S.items.splice(+i, 1); S.copyText = null; draw(1); },
+  mode: m => { S.mode = m; draw(1); },
+  addc: () => { const v = $('#cu').value.trim(); if (!v) { $('#cu').focus(); return; } S.items.push({n:v, c:'O', p:'A gusto'}); draw(1); },
+  jump: k => { if (S.mode !== 'g') { S.mode = 'g'; draw(1); } const el = document.getElementById('g-' + k); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); el.querySelector('button')?.focus({preventScroll:true}); } },
+  save: () => {
+    const nm = ($('#nm')?.value || '').trim();
+    const o = {id: S.eid || Date.now(), meal: S.meal, name: nm || S.items.map(x => x.n).slice(0,3).join(' + '), items: S.items.map(x => ({...x}))};
+    const k = saved.findIndex(x => x.id === o.id); if (k >= 0) saved[k] = o; else saved.push(o);
+    S.eid = o.id; S.name = o.name; store(); toast('Guardado en Mis comidas'); draw(1);
+  },
+  reset: () => { S.items = []; S.eid = null; S.name = ''; S.copyText = null; draw(1); },
+  copy: async () => {
+    const t = plateText();
+    try { await navigator.clipboard.writeText(t); toast('Plato copiado: pegalo en WhatsApp'); S.copyText = null; }
+    catch(e) { S.copyText = t; draw(1); toast('Copiá el texto de abajo y pegalo en WhatsApp'); }
+  },
+  pan: n => { const k = S.pantry.indexOf(n); if (k >= 0) S.pantry.splice(k, 1); else S.pantry.push(n); draw(1); },
+  pref: p => { S.pref = p; draw(1); },
+  tmax: t => { S.tmax = +t; draw(1); },
+  ideas: () => { findIdeas(); draw(1); setTimeout(() => document.querySelector('.ideas-grid, .blank:last-of-type')?.scrollIntoView({behavior:'smooth', block:'start'}), 30); },
+  use: i => { const r = RECIPES[+i]; S.items = r.i.map(n => ({...findF(n)})); S.eid = null; S.name = r.n; S.v = 'build'; S.copyText = null; draw(); },
+  open: id => { const o = saved.find(x => x.id === +id); if (!o) return; S.meal = o.meal; S.items = o.items.map(x => ({...x})); S.eid = o.id; S.name = o.name; S.v = 'build'; S.copyText = null; draw(); },
+  dup: id => { const o = saved.find(x => x.id === +id); if (!o) return; S.meal = o.meal; S.items = o.items.map(x => ({...x})); S.eid = null; S.name = o.name + ' (copia)'; S.v = 'build'; draw(); },
+  del: id => { S.del = +id; draw(1); },
+  delok: id => { saved = saved.filter(x => x.id !== +id); S.del = null; store(); toast('Plato eliminado'); draw(1); },
+  delno: () => { S.del = null; draw(1); }
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.tagName === 'SELECT') return;
+  const f = A[b.dataset.act]; if (f) { e.preventDefault(); f(b.dataset.arg); }
+});
+document.addEventListener('change', e => {
+  const s = e.target.closest('select[data-act="portion"]'); if (s) { S.items[+s.dataset.arg].p = s.value; S.copyText = null; }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { S.q = e.target.value; renderRes(); }
+  if (e.target.id === 'nm') { S.name = e.target.value; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'cu') A.addc(); });
+
+const TAB = {home:'Inicio', build:'Armar plato', ideas:'Ideas', saved:'Mis comidas'};
+document.querySelectorAll('nav.tabs button').forEach(b => { b.innerHTML = ic(b.dataset.tab, 20) + `<span>${TAB[b.dataset.tab]}</span>`; });
+draw();
+</script>
+</body>
+</html>
